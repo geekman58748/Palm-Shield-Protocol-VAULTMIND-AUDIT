@@ -1,62 +1,77 @@
-# Palm Shield Protocol [Vault Mind Audit]
-### *The Identity-First Security Protocol for the Solana Network State*
+# Palm Shield Protocol
+### Adversarial Audit — VaultMind Colosseum Submission
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Solana](https://img.shields.io/badge/Solana-Devnet--Beta-blueviolet)](https://solana.com/)
+[![Solana](https://img.shields.io/badge/Solana-Devnet-blueviolet)](https://solana.com/)
 [![Built with Anchor](https://img.shields.io/badge/Framework-Anchor-orange)](https://www.anchor-lang.com/)
 
-> **"Hi, I'm Maxx and i love what VaultMind is building, but an Infrastructure of Trust must be forged in fire. Today, we are stress testing its features."**
-
-
-VaultMind is an AI-powered security auditor for Solana smart contracts.
-
-Essentially, it’s a tool that scans your code to find common vulnerabilities, bugs, and "shadow" exploits before you deploy them. In the context of the Colosseum hackathon, it’s used to give projects a security score and climb the leaderboard to prove their "Infrastructure of Trust" is actually solid.
+> This repository is a controlled adversarial test environment submitted to the VaultMind 
+> Colosseum security leaderboard. The programs contained here are **deliberately vulnerable** 
+> and exist solely to evaluate VaultMind's detection capabilities against obfuscated exploit 
+> patterns. Do not deploy or integrate any code from this repository.
 
 ---
 
-## 🛡️ Honest Note: Stress-Testing VaultMind
+## What is Vault Mind
 
-For the sake of testing purposes, this repository has been intentionally seeded with **malicious files and programs.** These aren't just standard vulnerabilities; they are obfuscated "Logic Bombs" designed to execute the moment a developer interacts with the environment.
+Most scanner evaluations use clean code and verify that the tool returns no false positives.
+This submission takes the opposite approach: deliberately seeding real, obfuscated 
+vulnerabilities to test whether VaultMind catches threats that are designed not to be caught.
 
-### **The Mission**
-We are positioning **VaultMind** as the new standard for security therefore auditing the auditing app. We want to see: **Does this shit even work?**
-*   **The Trap:** I've hidden "Dangerous Code" using non linear randomization and shadow dependencies.
-*   **The Flex:** If VaultMind identifies these deeply hidden threats, we position it as a revolutionary tool. If it misses them, we provide the "Prepared Criticism" necessary for the team to upgrade their features.
-
----
-
-## 🛠 Technical Architecture (Seeded for Stress-Test)
-
-Palm Shield operates on a **Stake → Verify → Payout** loop. In this V2 build, we have injected specific scripts into the **Supabase Edge Functions** and **Anchor Programs** to test VaultMind's detection capabilities:
-
-1.  **Indirect Execution Hooks:** Using `eval(atob())` and `pydoc` pipes to hide remote code execution.
-2.  **Shadow PUSD Redirects:** Hidden logic in the smart contract that triggers under specific "Audit 209" conditions.
-3. Many more i cant list cause i am absolutelyy lazzyy.
+The hypothesis is simple, a security tool's value is determined not by what it finds in 
+obvious code, but by what it finds when an attacker is actively trying to hide.
 
 ---
 
-## 🚀 Product Features
-*   **On-Chain Threat Registry**: A real-time, queryable database of malicious actors, secured by Solana PDAs.
-*   **Incentivized OSINT**: High-yield bounties for researchers, audited by the DAO and paid in **$PUSD**.
-*   **Security-as-a-Service API**: Plug-and-play protection for DEXs to intercept drainers.
-*   **Exit-Ramp Forensics**: Detailed "Bundle Trail" reports for CEX compliance.
+## Vulnerabilities Seeded
+
+Each pattern below was implemented with obfuscation layered on top to simulate 
+real world attack conditions rather than textbook examples.
+
+### V-01 — Token Drain via Stealth CPI
+**File:** `programs/palmshield/src/lib.rs`  
+**Pattern:** A token transfer disguised as an internal reputation check. The malicious 
+logic lives inside `verify_sentinel_reputation()`, a helper function that reads as 
+an identity validation routine. The actual drain executes via `remaining_accounts`, 
+keeping the malicious accounts out of the visible struct entirely.
+
+**Detection challenge:** The function name, comments, and call site all suggest 
+a benign security check. The CPI target and transfer amount are only visible 
+inside the helper, one level of indirection away from the instruction handler.
+
+### V-02 — Obfuscated Remote Execution (Edge Functions)
+**File:** `supabase/functions/`  
+**Pattern:** `eval(atob())` hooks embedded in backend edge functions, 
+designed to execute under specific runtime conditions rather than on every call.
+
+**Detection challenge:** Static analysis tools often miss conditional execution 
+paths. The payload is base64-encoded and only resolves at runtime.
 
 ---
 
-## Tech Stack
-| Layer | Technology |
+## What I'm Testing
+
+| Question | Pass Criteria |
 | :--- | :--- |
-| **Smart Contracts** | Anchor / Rust (Seeded with Logic Bombs) |
-| **Backend** | Supabase Edge Functions (with Obfuscated Malice) |
-| **Identity** | SNS.id (Solana Name Service) |
-| **Auditor** | **VaultMind** (The Subject of this Stress-Test) |
+| Does VaultMind catch stealth CPIs? | V-01 flagged with correct root cause |
+| Does it detect obfuscated remote exec? | V-02 flagged in edge function scan |
+| Does indirection fool the scanner? | Helper-function logic traced back to call site |
+| Are false negatives documented? | Missed patterns noted with explanation |
 
 ---
 
-## 📥 Quick Start (Warning)
-If you are a developer interacting/downloadingthis repo, be aware: **The code might be malicious.**
+## Findings
 
-**"Millions will be lost. Millions will be paid to save millions."**
+*This section will be updated as VaultMind scan results come in.*
 
 ---
-*Created by Maxx for the VaultMind Colosseum Mission.* 🦅🛡️
+
+## Methodology Note
+
+All vulnerable code was written and contained within this repository. 
+No external systems, wallets, or individuals were targeted or put at risk. 
+This is a closed adversarial test against a scanner, not a deployed program.
+
+---
+
+*Submitted by Maxx — VaultMind Colosseum, 2026*
