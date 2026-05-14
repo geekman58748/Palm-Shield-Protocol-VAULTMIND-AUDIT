@@ -1,4 +1,4 @@
-# Palm Shield Protocol
+# Palm Shield Protocol x Vault Mind
 ### Adversarial Audit — VaultMind Colosseum Submission
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
