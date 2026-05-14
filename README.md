@@ -28,21 +28,38 @@ obvious code, but by what it finds when an attacker is actively trying to hide.
 Each pattern below was implemented with obfuscation layered on top to simulate 
 real world attack conditions rather than textbook examples.
 
+## Vulnerabilities Seeded
+
 ### V-01 — Token Drain via Stealth CPI
-**File:** `programs/palmshield/src/lib.rs`  
-**Pattern:** A token transfer disguised as an internal reputation check. The malicious 
-logic lives inside `verify_sentinel_reputation()`, a helper function that reads as 
-an identity validation routine. The actual drain executes via `remaining_accounts`, 
-keeping the malicious accounts out of the visible struct entirely.
+**File:** `Anchor Program/voting.rs`
+**Pattern:** A token transfer disguised as an internal reputation check inside
+`verify_sentinel_reputation()`. The drain executes via `remaining_accounts`,
+keeping malicious accounts out of the visible struct entirely.
+**VaultMind coverage:** Not covered by V01–V13
 
-**Detection challenge:** The function name, comments, and call site all suggest 
-a benign security check. The CPI target and transfer amount are only visible 
-inside the helper, one level of indirection away from the instruction handler.
+### V-02 — Account Reinitialization
+**File:** `Anchor program/init.rs`
+**Pattern:** `init_if_needed` used without an `is_initialized` guard, allowing
+any caller to overwrite the authority field of an existing sentinel account.
+**VaultMind coverage:** Should be caught by V06
 
-### V-02 — Obfuscated Remote Execution (Edge Functions)
-**File:** `supabase/functions/`  
-**Pattern:** `eval(atob())` hooks embedded in backend edge functions, 
-designed to execute under specific runtime conditions rather than on every call.
+### V-03 — Arithmetic Underflow / Overflow
+**File:** `Anchor Program/flow.rs`
+**Pattern:** Raw `-` and `+` operators on u64 balance fields with no
+`checked_sub` or `checked_add`. Underflow wraps to u64::MAX in release mode.
+**VaultMind coverage:** Should be caught by V13
+
+---
+
+## What I'm Testing
+
+| Question | Pass Criteria |
+| :--- | :--- |
+| Does VaultMind catch stealth CPIs? | V-01 flagged with correct root cause |
+| Does indirection fool the scanner? | Helper function logic traced to call site |
+| Does it catch reinitialization? | V-02 flagged under V06 |
+| Does it catch unchecked arithmetic? | V-03 flagged under V13 |
+| Are false negatives documented? | Missed patterns noted with explanation |
 
 **Detection challenge:** Static analysis tools often miss conditional execution 
 paths. The payload is base64-encoded and only resolves at runtime.
