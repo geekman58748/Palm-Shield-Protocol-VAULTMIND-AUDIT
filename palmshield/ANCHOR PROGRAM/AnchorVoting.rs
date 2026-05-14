@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Transfer, TokenAccount, Token};
 
-declare_id!("AcksH6RgonJwV52Zd59GmxdXUJAMvdU1B3mq8BAEu3bm"); 
+declare_id!("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"); 
 
 #[program]
 pub mod palmshield {
